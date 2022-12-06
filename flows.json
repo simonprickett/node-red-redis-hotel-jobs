@@ -1,0 +1,400 @@
+[
+    {
+        "id": "227d6a0eb8b4a41b",
+        "type": "tab",
+        "label": "Redis Hotel Jobs",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "7a24df30cbec250f",
+        "type": "redis-in",
+        "z": "227d6a0eb8b4a41b",
+        "server": "30d0edebf3a6e3a2",
+        "command": "subscribe",
+        "name": "Jobs",
+        "topic": "jobs",
+        "timeout": 0,
+        "x": 170,
+        "y": 280,
+        "wires": [
+            [
+                "0be4edfcef134581",
+                "1cfc4fd52b4a5984",
+                "05924162a1f9c9b2"
+            ]
+        ]
+    },
+    {
+        "id": "0be4edfcef134581",
+        "type": "function",
+        "z": "227d6a0eb8b4a41b",
+        "name": "Count Incoming Job",
+        "func": "msg.topic = 'jobs_received';\nmsg.payload = [ msg.payload.job, 1];\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 360,
+        "wires": [
+            [
+                "db3a569b337be246"
+            ]
+        ]
+    },
+    {
+        "id": "db3a569b337be246",
+        "type": "redis-command",
+        "z": "227d6a0eb8b4a41b",
+        "server": "30d0edebf3a6e3a2",
+        "command": "hincrby",
+        "name": "Count Jobs",
+        "topic": "",
+        "params": "{}",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 690,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7e13f84299660af5",
+        "type": "redis-command",
+        "z": "227d6a0eb8b4a41b",
+        "server": "30d0edebf3a6e3a2",
+        "command": "publish",
+        "name": "Publish Job",
+        "topic": "",
+        "params": "[\"jobs\", \"cleaning\"]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 690,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f45b75d4218347a8",
+        "type": "inject",
+        "z": "227d6a0eb8b4a41b",
+        "name": "Inject Random Job",
+        "props": [],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 220,
+        "y": 180,
+        "wires": [
+            [
+                "22880e0b5ac1d792"
+            ]
+        ]
+    },
+    {
+        "id": "22880e0b5ac1d792",
+        "type": "function",
+        "z": "227d6a0eb8b4a41b",
+        "name": "Job Randomizer",
+        "func": "const jobs = [\n    'cleaning',\n    'taxi',\n    'towels',\n    'phone call'\n];\n\nconst selectedJob = Math.floor(Math.random() * jobs.length);\nconst roomNumber = Math.floor((Math.random() * 300) + 1);\n\nmsg.topic = 'jobs';\nmsg.payload = JSON.stringify({ id: crypto.randomUUID(), job: jobs[selectedJob], room: roomNumber });\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 460,
+        "y": 180,
+        "wires": [
+            [
+                "7e13f84299660af5",
+                "8a705329cb2982cf"
+            ]
+        ]
+    },
+    {
+        "id": "e343ef479026e2e9",
+        "type": "redis-command",
+        "z": "227d6a0eb8b4a41b",
+        "server": "30d0edebf3a6e3a2",
+        "command": "hset",
+        "name": "Create Job Record",
+        "topic": "",
+        "params": "{}",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 630,
+        "y": 640,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1cfc4fd52b4a5984",
+        "type": "function",
+        "z": "227d6a0eb8b4a41b",
+        "name": "Create Job Record",
+        "func": "msg.topic = msg.payload.id;\nmsg.payload = [ 'created', Date.now()]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 640,
+        "wires": [
+            [
+                "e343ef479026e2e9"
+            ]
+        ]
+    },
+    {
+        "id": "7a0ba22af812cd9c",
+        "type": "redis-in",
+        "z": "227d6a0eb8b4a41b",
+        "server": "30d0edebf3a6e3a2",
+        "command": "subscribe",
+        "name": "Queue Worker",
+        "topic": "jobs",
+        "timeout": 0,
+        "x": 190,
+        "y": 760,
+        "wires": [
+            [
+                "6aa3d852840b5f3f"
+            ]
+        ]
+    },
+    {
+        "id": "6aa3d852840b5f3f",
+        "type": "delay",
+        "z": "227d6a0eb8b4a41b",
+        "name": "Pretend to do Job",
+        "pauseType": "random",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "10",
+        "randomLast": "10",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 430,
+        "y": 760,
+        "wires": [
+            [
+                "a771432b3ca32ab8",
+                "c5e8f2d677ada0f2",
+                "c598f84da93d508e",
+                "3c583ed6dfc5984f"
+            ]
+        ]
+    },
+    {
+        "id": "a771432b3ca32ab8",
+        "type": "function",
+        "z": "227d6a0eb8b4a41b",
+        "name": "Count Completed Job",
+        "func": "msg.topic = 'jobs_done';\nmsg.payload = [msg.payload.job, 1];\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 760,
+        "wires": [
+            [
+                "517dca11a1a7f297"
+            ]
+        ]
+    },
+    {
+        "id": "05924162a1f9c9b2",
+        "type": "function",
+        "z": "227d6a0eb8b4a41b",
+        "name": "Count Jobs by Room",
+        "func": "msg.payload = [ 1, msg.payload.room ];\nmsg.topic = 'jobs_by_room';\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 500,
+        "wires": [
+            [
+                "af1ab85bd9bcb41c"
+            ]
+        ]
+    },
+    {
+        "id": "af1ab85bd9bcb41c",
+        "type": "redis-command",
+        "z": "227d6a0eb8b4a41b",
+        "server": "30d0edebf3a6e3a2",
+        "command": "zincrby",
+        "name": "Update Sorted Set",
+        "topic": "",
+        "params": "{}",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 730,
+        "y": 500,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "517dca11a1a7f297",
+        "type": "redis-command",
+        "z": "227d6a0eb8b4a41b",
+        "server": "30d0edebf3a6e3a2",
+        "command": "hincrby",
+        "name": "Count Completed Jobs",
+        "topic": "",
+        "params": "{}",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 1010,
+        "y": 760,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8a705329cb2982cf",
+        "type": "debug",
+        "z": "227d6a0eb8b4a41b",
+        "name": "New Job",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "c5e8f2d677ada0f2",
+        "type": "debug",
+        "z": "227d6a0eb8b4a41b",
+        "name": "Completed Job",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "c598f84da93d508e",
+        "type": "function",
+        "z": "227d6a0eb8b4a41b",
+        "name": "Update Job Record",
+        "func": "msg.topic = msg.payload.id;\nmsg.payload = [ 'completed', Date.now()]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 920,
+        "wires": [
+            [
+                "07acd96854bf3926"
+            ]
+        ]
+    },
+    {
+        "id": "07acd96854bf3926",
+        "type": "redis-command",
+        "z": "227d6a0eb8b4a41b",
+        "server": "30d0edebf3a6e3a2",
+        "command": "hset",
+        "name": "Update Job Record",
+        "topic": "",
+        "params": "{}",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 950,
+        "y": 920,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0aab1b9b0d69e5d0",
+        "type": "redis-command",
+        "z": "227d6a0eb8b4a41b",
+        "server": "30d0edebf3a6e3a2",
+        "command": "expire",
+        "name": "Expire Job Record",
+        "topic": "",
+        "params": "{}",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 950,
+        "y": 1000,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3c583ed6dfc5984f",
+        "type": "function",
+        "z": "227d6a0eb8b4a41b",
+        "name": "Expire Job Record",
+        "func": "msg.topic = msg.payload.id;\nmsg.payload = [ 10 ]; \nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 1000,
+        "wires": [
+            [
+                "0aab1b9b0d69e5d0"
+            ]
+        ]
+    },
+    {
+        "id": "30d0edebf3a6e3a2",
+        "type": "redis-config",
+        "name": "Local",
+        "options": "{\"port\":6379,\"host\":\"localhost\"}",
+        "cluster": false,
+        "optionsType": "json"
+    }
+]
