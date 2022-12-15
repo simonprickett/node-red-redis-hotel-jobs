@@ -1,0 +1,500 @@
+[
+    {
+        "id": "f7f099039cd9fc9d",
+        "type": "tab",
+        "label": "Redis Hotel",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "3408f2a4c6cc800e",
+        "type": "function",
+        "z": "f7f099039cd9fc9d",
+        "name": "Generate Job",
+        "func": "const jobs = [\n    'cleaning',\n    'taxi',\n    'towels',\n    'phone call'\n];\n\nconst selectedJob = Math.floor(Math.random() * jobs.length);\nconst roomNumber = Math.floor((Math.random() * 300) + 1);\n\nconst payload = {\n    id: crypto.randomUUID(),\n    job: jobs[selectedJob],\n    room: roomNumber\n};\n\nmsg.topic = 'jobs';\nmsg.payload = JSON.stringify(payload);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 600,
+        "y": 80,
+        "wires": [
+            [
+                "628223bd5f49e7b9",
+                "6a8cf4036cf12fa6"
+            ]
+        ]
+    },
+    {
+        "id": "628223bd5f49e7b9",
+        "type": "debug",
+        "z": "f7f099039cd9fc9d",
+        "name": "Log New Job",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 830,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "6a8cf4036cf12fa6",
+        "type": "redis-command",
+        "z": "f7f099039cd9fc9d",
+        "server": "ae544ed62a426dd3",
+        "command": "PUBLISH",
+        "name": "Publish Job",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 830,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2d4ef0d12f38e18a",
+        "type": "redis-in",
+        "z": "f7f099039cd9fc9d",
+        "server": "ae544ed62a426dd3",
+        "command": "subscribe",
+        "name": "Accounting Subscriber",
+        "topic": "jobs",
+        "obj": true,
+        "timeout": 0,
+        "x": 160,
+        "y": 160,
+        "wires": [
+            [
+                "4849ff03764298ee",
+                "7ddb17fe480507c2",
+                "d69d4760778a2bcd",
+                "6eba489cbe8bb470"
+            ]
+        ]
+    },
+    {
+        "id": "4849ff03764298ee",
+        "type": "debug",
+        "z": "f7f099039cd9fc9d",
+        "name": "Received Job",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 420,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "7ddb17fe480507c2",
+        "type": "function",
+        "z": "f7f099039cd9fc9d",
+        "name": "Count Incoming Job",
+        "func": "msg.topic = 'jobs_received';\nmsg.payload = [ msg.payload.job, 1 ];\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 240,
+        "wires": [
+            [
+                "a02636cff38af4b2"
+            ]
+        ]
+    },
+    {
+        "id": "a02636cff38af4b2",
+        "type": "redis-command",
+        "z": "f7f099039cd9fc9d",
+        "server": "ae544ed62a426dd3",
+        "command": "HINCRBY",
+        "name": "Update jobs_received Hash",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 760,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d69d4760778a2bcd",
+        "type": "function",
+        "z": "f7f099039cd9fc9d",
+        "name": "Count Jobs by Room",
+        "func": "msg.topic = 'jobs_by_room';\nmsg.payload = [ 1, msg.payload.room ];\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 320,
+        "wires": [
+            [
+                "c5d56a6a956b839e"
+            ]
+        ]
+    },
+    {
+        "id": "c5d56a6a956b839e",
+        "type": "redis-command",
+        "z": "f7f099039cd9fc9d",
+        "server": "ae544ed62a426dd3",
+        "command": "ZINCRBY",
+        "name": "Update Sorted Set",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 730,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6eba489cbe8bb470",
+        "type": "function",
+        "z": "f7f099039cd9fc9d",
+        "name": "Create Job Record",
+        "func": "msg.topic = msg.payload.id;\nmsg.payload = ['created', Date.now() ];\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 400,
+        "wires": [
+            [
+                "c87e38690a54b171"
+            ]
+        ]
+    },
+    {
+        "id": "c87e38690a54b171",
+        "type": "redis-command",
+        "z": "f7f099039cd9fc9d",
+        "server": "ae544ed62a426dd3",
+        "command": "HSET",
+        "name": "Create Job Hash",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 730,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "236f7a4bebd4d0f3",
+        "type": "redis-in",
+        "z": "f7f099039cd9fc9d",
+        "server": "ae544ed62a426dd3",
+        "command": "subscribe",
+        "name": "Worker Subscriber",
+        "topic": "jobs",
+        "obj": true,
+        "timeout": 0,
+        "x": 150,
+        "y": 460,
+        "wires": [
+            [
+                "e59094a4cadcbb7c"
+            ]
+        ]
+    },
+    {
+        "id": "e59094a4cadcbb7c",
+        "type": "delay",
+        "z": "f7f099039cd9fc9d",
+        "name": "Pretend to do job...",
+        "pauseType": "random",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "10",
+        "randomLast": "15",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 410,
+        "y": 460,
+        "wires": [
+            [
+                "b538bdf18a63c53b",
+                "8de8e68bcfd19dad",
+                "3666c62c2559a540",
+                "a7604ee7a703dcfd"
+            ]
+        ]
+    },
+    {
+        "id": "b538bdf18a63c53b",
+        "type": "function",
+        "z": "f7f099039cd9fc9d",
+        "name": "Count Completed Job",
+        "func": "msg.topic = 'jobs_done';\nmsg.payload = [ msg.payload.job, 1 ];\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 700,
+        "y": 460,
+        "wires": [
+            [
+                "e06354d6e8e7bd4a"
+            ]
+        ]
+    },
+    {
+        "id": "e06354d6e8e7bd4a",
+        "type": "redis-command",
+        "z": "f7f099039cd9fc9d",
+        "server": "ae544ed62a426dd3",
+        "command": "HINCRBY",
+        "name": "Update jobs_done Hash",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 970,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8de8e68bcfd19dad",
+        "type": "function",
+        "z": "f7f099039cd9fc9d",
+        "name": "Update Job Record",
+        "func": "msg.topic = msg.payload.id;\nmsg.payload = [ 'completed', Date.now() ];\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 520,
+        "wires": [
+            [
+                "15046ea86b120189"
+            ]
+        ]
+    },
+    {
+        "id": "15046ea86b120189",
+        "type": "redis-command",
+        "z": "f7f099039cd9fc9d",
+        "server": "ae544ed62a426dd3",
+        "command": "HSET",
+        "name": "Update Job Hash",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 950,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3666c62c2559a540",
+        "type": "function",
+        "z": "f7f099039cd9fc9d",
+        "name": "Expire Job",
+        "func": "msg.topic = msg.payload.id;\nmsg.payload = [ 10 ];\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 580,
+        "wires": [
+            [
+                "1fddd9fa105e54e7"
+            ]
+        ]
+    },
+    {
+        "id": "1fddd9fa105e54e7",
+        "type": "redis-command",
+        "z": "f7f099039cd9fc9d",
+        "server": "ae544ed62a426dd3",
+        "command": "EXPIRE",
+        "name": "Expire Job Hash",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 920,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "998f32b4fe58deb1",
+        "type": "rpi-gpio in",
+        "z": "f7f099039cd9fc9d",
+        "name": "New Job Button",
+        "pin": "17",
+        "intype": "up",
+        "debounce": "100",
+        "read": false,
+        "bcm": true,
+        "x": 140,
+        "y": 80,
+        "wires": [
+            [
+                "3ad151a9178e4477"
+            ]
+        ]
+    },
+    {
+        "id": "3ad151a9178e4477",
+        "type": "function",
+        "z": "f7f099039cd9fc9d",
+        "name": "Button Filter",
+        "func": "if (msg.payload === 1) {\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 80,
+        "wires": [
+            [
+                "3408f2a4c6cc800e"
+            ]
+        ]
+    },
+    {
+        "id": "3978ab12023b5bec",
+        "type": "rpi-gpio out",
+        "z": "f7f099039cd9fc9d",
+        "name": "Job Done Light",
+        "pin": "26",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "bcm": true,
+        "x": 980,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "a7604ee7a703dcfd",
+        "type": "function",
+        "z": "f7f099039cd9fc9d",
+        "name": "Light the Light",
+        "func": "msg.payload = 1;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 660,
+        "wires": [
+            [
+                "3978ab12023b5bec",
+                "05af578c828a42f1"
+            ]
+        ]
+    },
+    {
+        "id": "05af578c828a42f1",
+        "type": "delay",
+        "z": "f7f099039cd9fc9d",
+        "name": "Light Delay",
+        "pauseType": "delay",
+        "timeout": "2",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 710,
+        "y": 720,
+        "wires": [
+            [
+                "3e7fbe724ecfa29d"
+            ]
+        ]
+    },
+    {
+        "id": "3e7fbe724ecfa29d",
+        "type": "function",
+        "z": "f7f099039cd9fc9d",
+        "name": "Turn off the Light",
+        "func": "msg.payload = 0;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 890,
+        "y": 720,
+        "wires": [
+            [
+                "3978ab12023b5bec"
+            ]
+        ]
+    },
+    {
+        "id": "ae544ed62a426dd3",
+        "type": "redis-config",
+        "name": "Local Redis",
+        "options": "REDIS_URL",
+        "cluster": false,
+        "optionsType": "env"
+    }
+]
