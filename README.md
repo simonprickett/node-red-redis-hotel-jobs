@@ -32,6 +32,12 @@ This repository contains two versions of the same Node-RED flow as follows:
 * `flows_no_hardware.json` - use this if you're not using the optional arcade button and LED, and/or if you aren't running Node-RED on a Raspberry Pi.
 * `flows_with_hardware.json` - use this if you're running on a Raspberry Pi and have fitted the optional arcade button and LED.
 
+See the Node-RED instructions [here](https://nodered.org/docs/user-guide/editor/workspace/import-export) to learn how to import the flow into Node-RED.
+
 ## Hardware Setup
 
-TODO
+If you're using the LED arcade button on the Raspberry Pi, you'll need to use two pairs of arcade button quick wires to connect it to the GPIO pins.
+
+Using the GPIO diagram on [pinout.xyz](https://pinout.xyz/), attach wires as follows:
+
+* TODO
