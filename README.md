@@ -76,8 +76,11 @@ Using the GPIO diagram on [pinout.xyz](https://pinout.xyz/), attach wires as fol
 
 ## Running the Flow
 
-TODO
+* If you're using the flow with the arcade button attached, inject a job by pressing the arcade button.
+* If you're using the softwsre only flow, inject a job by clicking in the grey square on the "Inject Random Job" node.
 
-## Watching the Data in Redis with RedisInsight
+## Watching the Data Flow
+
+The flow outputs data to two places.  Have both open to watch the data move through the system in real-time.
 
 TODO
