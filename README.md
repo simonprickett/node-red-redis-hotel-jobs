@@ -1,6 +1,18 @@
 # Redis Hotel Jobs Example with Node-RED for Raspberry Pi
 
-Redis backed hotel jobs example using node-red.
+This is an example Node-RED flow that simulates room service type jobs at a Hotel.  Jobs are randomly created and published on a Redis pub/sub topic.  A job consists of a randomly generated room number and a job type, which can be one of:
+
+* `cleaning`: The room needs to be cleaned.
+* `taxi`: The guest would like to order a taxi.
+* `towels`: The guest would like additional towels.
+* `phone call`: There's a phone message to relay to the guest.
+
+Each job is then picked up by two subscribers:
+
+* The "Accounting Subscriber" records that the job was requested and the time at which that happened, storing this information in Redis as a Hash.  It also keeps a count of the number of jobs requested by each room number in a Redis Sorted Set and updates a further Redis Hash that counts the number of jobs of each type requested by all rooms.
+* The "Worker Subscriber" represents the staff doing the jobs requested by the guests.  When this subscriber receives a job, it spends a few seconds pretending to do it, then updates the job's Hash in Redis with a completed time and sets it to expire.  It also updates a "jobs completed" Hash to keep count of the number of jobs of each type that have been completed.
+
+Here's what the flow diagram looks like in Node-RED:
 
 ![The Node-RED Flow running on a Raspberry Pi](redis_node_red_flow_pi.png)
 
@@ -61,3 +73,11 @@ If you're using the LED arcade button on the Raspberry Pi, you'll need to use tw
 Using the GPIO diagram on [pinout.xyz](https://pinout.xyz/), attach wires as follows:
 
 * TODO
+
+## Running the Flow
+
+TODO
+
+## Watching the Data in Redis with RedisInsight
+
+TODO
