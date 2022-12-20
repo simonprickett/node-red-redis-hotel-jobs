@@ -83,4 +83,5 @@ Using the GPIO diagram on [pinout.xyz](https://pinout.xyz/), attach wires as fol
 
 The flow outputs data to two places.  Have both open to watch the data move through the system in real-time.
 
-TODO
+* In Node-RED, open the Debug sidebar ([instructions here](https://nodered.org/docs/user-guide/editor/sidebar/debug)).  You'll see the output from the two debug nodes in the flow here.
+* Use RedisInsight's browser view to watch the job keys (each job's key will be a UUID) being created and expired.  Also look at the Sorted Set (key: `jobs_by_room`) and Hashes (keys `jobs_received` and `jobs_done`).  Use the "Auto Refresh" feature to have RedisInsight update the view every few seconds (see the videos for how to do this).
