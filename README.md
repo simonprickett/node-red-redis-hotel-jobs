@@ -58,10 +58,10 @@ Make the following changes to the settings file and save it...
 At the top of the file just before the line `module.exports = {`, add the following to set your Redis creddentials in the form of a Redis URL as an environment variable:
 
 ```javascript
-process.env.REDIS_URL="redis://<user>:<password>@<host>:<port>"
+process.env.REDIS_URL="redis://default:<password>@<host>:<port>"
 ```
 
-where `<user>`, `<password>`, `<host>` and `<port>` are the values you obtained from Redis cloud in the "Redis Setup" step.
+where `<password>`, `<host>` and `<port>` are the values you obtained from Redis cloud in the "Redis Setup" step.
 
 ## Node-RED Flows
 
