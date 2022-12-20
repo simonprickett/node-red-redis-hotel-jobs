@@ -18,7 +18,7 @@ Here's what the flow diagram looks like in Node-RED:
 
 ## Videos
 
-Watch the two livestreams that I did covering this project...
+Watch the two livestreams that I did covering this project, these explain how it works in detail...
 
 * [Episode 1](https://www.youtube.com/watch?v=byt8jWg6M98) (YouTube)
 * [Episode 2](https://www.youtube.com/watch?v=r3yaVFN7Mzg) (YouTube)
@@ -36,7 +36,13 @@ This project can run on a Raspberry Pi or any other computer that can run Node-R
 
 ## Redis Setup
 
-TODO how to get Redis in the cloud and connect to it with RedisInsight...
+Get a free Redis instance in the cloud by signing up at redis.com [here](https://redis.com/try-free/).  Be sure to use the free tier, you don't need to add a payment method when using this.
+
+Once you've created your instance, make a note of the following connection details that you'll need later when you configure Node-RED to talk to Redis.  Treat these like secrets, don't share them or commit them to source control!:
+
+* Redis Host: example `redis-11483.c275.us-east-1-4.ec2.cloud.redislabs.com`
+* Redis Port: example `11483`
+* Redis Password: example `super5ecret2022$`
 
 ## Node-RED Setup
 
