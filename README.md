@@ -76,9 +76,19 @@ See the Node-RED instructions [here](https://nodered.org/docs/user-guide/editor/
 
 If you're using the LED arcade button on the Raspberry Pi, you'll need to use two pairs of arcade button quick wires to connect it to the GPIO pins.
 
-Using the GPIO diagram on [pinout.xyz](https://pinout.xyz/), attach wires as follows (use the Broadcom numbering scheme - the big numbers with "GPIO" next to them on the pinout.xyz diagram):
+Using the GPIO diagram on [pinout.xyz](https://pinout.xyz/), attach 2 pairs of quick connect wires as follows (use the Broadcom numbering scheme - the big numbers with "GPIO" next to them on the pinout.xyz diagram):
 
-* TODO
+* For the first pair, attach the end with the plastic connector so that it's connected to GPIO 17 pin and the ground pin next to it.
+* For the second paid, attach the end with the plastic connector so that it's connected to GPIO pin 26 and the ground pin next to it.
+
+![GPIO pin wiring for this project](wiring_gpio_pins.png)
+
+(Raspberry Pi GPIO layout diagram courtesy of [pinout.xyz](https://pinout.xyz/))
+
+* Take the pair of wires that are connected to GPIO 17 and ground and attach the spade connector ends to the arcade button switch terminals as shown below.
+* Take the pair of wires that are connected to GPIO 26 and ground and attach the spade connector ends to the arcade button LED terminals as shown below.
+
+TODO PHOTO
 
 ## Running the Flow
 
