@@ -55,7 +55,7 @@ Once you have installed Node-RED, use your preferred editor to edit the settings
 
 Make the following changes to the settings file and save it...
 
-At the top of the file just before the line `module.exports = {`, add the following to set your Redis creddentials in the form of a Redis URL as an environment variable:
+At the top of the file just before the line `module.exports = {`, add the following to set your Redis credentials in the form of a Redis URL as an environment variable:
 
 ```javascript
 process.env.REDIS_URL="redis://default:<password>@<host>:<port>"
@@ -88,7 +88,7 @@ Using the GPIO diagram on [pinout.xyz](https://pinout.xyz/), attach 2 pairs of q
 * Take the pair of wires that are connected to GPIO 17 and ground and attach the spade connector ends to the arcade button switch terminals as shown below.
 * Take the pair of wires that are connected to GPIO 26 and ground and attach the spade connector ends to the arcade button LED terminals as shown below.
 
-TODO PHOTO
+![Arcade button wiring for this project](arcade_button_wiring.jpg)
 
 ## Running the Flow
 
